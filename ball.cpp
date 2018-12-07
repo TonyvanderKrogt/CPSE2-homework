@@ -15,10 +15,6 @@ void ball::draw(sf::RenderWindow & window) const {
 	circle.setPosition(position);
 	circle.setFillColor(sf::Color::Blue);
 	window.draw(circle);
-	window.draw(topCircle);
-	window.draw(leftCircle);
-	window.draw(botCircle);
-	window.draw(rightCircle);
 }
 
 void ball::move(sf::Vector2f delta) {
@@ -61,9 +57,9 @@ void ball::hitbox_update()
 	leftCircle.setPosition(position.x, position.y + (size * 2 / 3));
 	botCircle.setPosition(position.x + (size * 2 / 3), position.y + size);
 	rightCircle.setPosition(position.x + size, position.y + (size * 2 / 3));
-	color_hitboxes();
+	//color_hitboxes();
 }
-
+/*
 void ball::color_hitboxes()
 {
 	topCircle.setFillColor(sf::Color::Yellow);
@@ -73,3 +69,4 @@ void ball::color_hitboxes()
 
 }
 
+*/

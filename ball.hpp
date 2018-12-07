@@ -17,7 +17,7 @@ public:
 
 	void hitbox_update();
 
-	void color_hitboxes();
+	//void color_hitboxes();
 private:
 
 	sf::Vector2f position;
