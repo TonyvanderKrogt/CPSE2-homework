@@ -1,0 +1,4 @@
+(123,126) CIRCLE blue 30
+(236,96) WALL red (20,480)
+(19,213) PICTURE OkHand.jpg
+(356,354) LINE blue (336,274)
