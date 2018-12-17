@@ -2,30 +2,26 @@
 #define _BALL_HPP
 
 #include "drawable.hpp"
-#include <iostream>
 
-class ball : public drawable{
+
+class ball : public drawable {
 public:
-
-	ball(sf::Vector2f position, float size = 30.0);
-
+	ball(sf::Vector2f position, sf::Color color, float size);
 	void draw(sf::RenderWindow & window) const override;
-
-	void move(sf::Vector2f delta)  override;
-
-	bool BallIntersects(sf::RectangleShape rect, float& xMovBall, float& yMovBall);
-
-	void hitbox_update();
-
-	//void color_hitboxes();
+	void jump(sf::Vector2f target);
+	void jump(float x, float y) override;
+	sf::FloatRect get_hitbox()const override;
+	std::string get_type() const override;
+	sf::Vector2f get_position() const override;
+	sf::Color get_color() const override;
+	sf::Vector2f get_size() const override;
+	std::string get_pathname() const override;
 private:
 
 	sf::Vector2f position;
+	sf::Color color;
 	float size;
-	sf::RectangleShape topCircle;
-	sf::RectangleShape botCircle;
-	sf::RectangleShape leftCircle;
-	sf::RectangleShape rightCircle;
+	sf::CircleShape circle;
 };
 
 #endif

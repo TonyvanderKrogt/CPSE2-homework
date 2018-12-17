@@ -1,26 +1,27 @@
 #include "player.hpp"
 #include <iostream>
 
-player::player(sf::Vector2f size, sf::Vector2f pos) :
+player::player(sf::Vector2f size, sf::Vector2f pos,sf::Color color) :
 	size(size),
-	pos(pos)
-{}
+	pos(pos),
+	color(color)
+{
+	rect.setSize(size);
+	rect.setPosition(pos);
+	rect.setFillColor(color);
+}
 
 void player::draw(sf::RenderWindow & window) const
 {
-
-	sf::RectangleShape rect(size);
-	rect.setPosition(pos);
-	rect.setFillColor(sf::Color::Red);
 	window.draw(rect);
 }
 
-void player::move(sf::Vector2f delta) {
-	pos += delta;
-}
-
 void player::jump(sf::Vector2f target) {
-	pos = target;
+	sf::FloatRect bounds = rect.getGlobalBounds();
+	if ( this->selected) {
+		pos = target;
+		rect.setPosition(pos);
+	}
 }
 
 void player::jump(float x, float y) {
@@ -30,9 +31,22 @@ void player::jump(float x, float y) {
 	));
 }
 
-sf::RectangleShape player::getPlayer()
-{
-	sf::RectangleShape rect(size);
-	rect.setPosition(pos);
-	return rect;
+sf::FloatRect player::get_hitbox()const {
+	return rect.getGlobalBounds();
+}
+
+std::string player::get_type() const {
+	return std::string{ "PLAYER" };
+}
+sf::Vector2f player::get_position() const {
+	return pos;
+}
+sf::Color player::get_color() const {
+	return color;
+}
+sf::Vector2f player::get_size() const {
+	return size;
+}
+std::string player::get_pathname() const {
+	return std::string("");
 }

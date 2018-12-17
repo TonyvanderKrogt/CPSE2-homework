@@ -1,72 +1,54 @@
 #include "ball.hpp"
 
-ball::ball(sf::Vector2f position, float size) :
-	position( position ),
-	size( size ),
-	topCircle(sf::Vector2f{ (size * 2/3),size }),
-	botCircle(sf::Vector2f{ (size * 2/3),size }),
-	leftCircle(sf::Vector2f{ size,(size * 2/3) }),
-	rightCircle(sf::Vector2f{ size,(size * 2/3) })
-{}
+ball::ball(sf::Vector2f position, sf::Color color, float size) :
+	position(position),
+	color(color),
+	size(size)
+{
+	circle.setRadius(size);
+	circle.setPosition(position);
+	circle.setFillColor(color);
+}
 
 void ball::draw(sf::RenderWindow & window) const {
-	sf::CircleShape circle;
-	circle.setRadius(size);
-	circle.setPosition(position);
-	circle.setFillColor(sf::Color::Blue);
 	window.draw(circle);
+
 }
 
-void ball::move(sf::Vector2f delta) {
-	position += delta;
-	hitbox_update();
-}
 
-bool ball::BallIntersects(sf::RectangleShape player, float &xMovBall, float& yMovBall)
-{
-	sf::CircleShape circle;
-	circle.setPosition(position);
-	circle.setRadius(size);
-	sf::FloatRect rectObj = player.getGlobalBounds();
-	sf::FloatRect top = topCircle.getGlobalBounds();
-	sf::FloatRect bot = botCircle.getGlobalBounds();
-	sf::FloatRect left = leftCircle.getGlobalBounds();
-	sf::FloatRect right = rightCircle.getGlobalBounds();
-	sf::FloatRect circleObj = circle.getGlobalBounds();
+void ball::jump(sf::Vector2f target) {
+	sf::FloatRect bounds = circle.getGlobalBounds();
+	if (this->selected){
+		position = target;
+		circle.setPosition(position);
 
-	if (top.intersects(rectObj)){
-		yMovBall = 3 ;
 	}
-	if (bot.intersects(rectObj)) {
-		yMovBall = -3;
-	}
-
-	if (left.intersects(rectObj)) {
-		xMovBall = 3;
-	}
-	if (right.intersects(rectObj)) {
-		xMovBall = -3;
-	}
-
-	return (circleObj.intersects(rectObj) || top.intersects(rectObj) || bot.intersects(rectObj) || left.intersects(rectObj) || right.intersects(rectObj));
+	
 }
 
-void ball::hitbox_update()
-{
-	topCircle.setPosition(position.x + (size * 2 / 3), position.y);
-	leftCircle.setPosition(position.x, position.y + (size * 2 / 3));
-	botCircle.setPosition(position.x + (size * 2 / 3), position.y + size);
-	rightCircle.setPosition(position.x + size, position.y + (size * 2 / 3));
-	//color_hitboxes();
-}
-/*
-void ball::color_hitboxes()
-{
-	topCircle.setFillColor(sf::Color::Yellow);
-	leftCircle.setFillColor(sf::Color::Green);
-	botCircle.setFillColor(sf::Color::Red);
-	rightCircle.setFillColor(sf::Color::White);
-
+void ball ::jump(float x, float y) {
+	jump(sf::Vector2f(
+		static_cast<float>(x),
+		static_cast<float>(y)
+	));
 }
 
-*/
+sf::FloatRect ball::get_hitbox()const {
+	return circle.getGlobalBounds();
+}
+
+std::string ball::get_type() const {
+	return std::string{ "CIRCLE" };
+}
+sf::Vector2f ball::get_position() const {
+	return position;
+}
+sf::Color ball::get_color() const {
+	return color;
+}
+sf::Vector2f ball::get_size() const {
+	return sf::Vector2f(size, 0);
+}
+std::string ball::get_pathname() const {
+	return std::string("");
+}

@@ -1,10 +1,16 @@
 #include <iostream>
+#include <fstream>
 #include <functional>
 #include <SFML/Graphics.hpp>
 #include "drawable.hpp"
 #include "ball.hpp"
 #include "wall.hpp"
 #include "player.hpp"
+#include "picture.hpp"
+#include "operators.hpp"
+#include "line.hpp"
+#include "exceptions.hpp"
+#include <string>
 
 class action {
 private:
@@ -45,44 +51,128 @@ public:
 	}
 };
 
+drawable * make_drawable(std::ifstream & input) {
+	sf::Vector2f position = { 0,0 };
+	std::string name = "";
+	input >> position >> name;
+
+	if (name == "CIRCLE") {
+		float size;
+		sf::Color color;
+		input >> color >> size;
+		return new ball(position, color, size);
+	}
+	else if (name == "WALL") {
+		sf::Vector2f size;
+		sf::Color color;
+		input >> color >> size;
+		return new wall(size, position, color);
+	}
+	else if (name == "PLAYER") {
+		sf::Vector2f size;
+		sf::Color color;
+		input >> color >> size;
+		return new player(size, position, color);
+	}
+	else if (name == "PICTURE") {
+		std::string image;
+		sf::Vector2f size;
+		input >> image;
+		return new picture(position, image);
+	}
+	else if (name == "LINE") {
+		sf::Vector2f size;
+		sf::Color color;
+		input >> color >> size;
+		return new line(position, color , size);
+	}
+	else if (name == "") {
+		throw end_of_file();
+	}
+	else {
+		throw unknown_shape(name);
+	}
+}
+void screen_object_write(std::ofstream & output, drawable* object) {
+	std::string name = object->get_type();
+	std::cout << name << '\n';
+	if (name == "CIRCLE") {
+		output << object->get_position() << ' ' << name;
+		output << ' ';
+		output << object->get_color() << ' ' << object->get_size().x;
+	}
+	else if (name == "WALL") {
+		output << object->get_position() << ' ';
+		output << object->get_type() << ' ';
+		output << object->get_color() << ' ';
+		output << object->get_size();
+	}
+	else if (name == "PICTURE") {
+		output << object->get_position() << ' ' << object->get_type() << ' ';
+		output << object->get_pathname();
+	}
+	else if (name == "LINE") {
+		output << object->get_position() << ' ' << object->get_type() << ' ';
+		output << object->get_color() << ' ';
+		output << object->get_size();
+	}
+	else if (name == "PLAYER") {
+		output << object->get_position() << ' ' << object->get_type() << ' ';
+		output << object->get_color() << ' ';
+		output << object->get_size();
+	}
+	output << '\n';
+}
+/*(320,240) CIRCLE blue 30
+(0.0,0.0) WALL red (20,480)
+(110, 50) PICTURE OkHand.jpg
+(100,100) LINE blue ( 80 ,20)*/
+
+
 int main(int argc, char *argv[]) {
 	std::cout << "Starting application 01-05 array of actions\n";
-	float playerSizeX = 80.0, playerSizeY = 80.0;
 	sf::RenderWindow window{ sf::VideoMode{ 640, 480 }, "SFML window" };
-	ball my_ball{ sf::Vector2f{ 320.0, 240.0 },30 };
-	wall left_wall{ sf::Vector2f{20.0, 480.0}, sf::Vector2f{0.0, 0.0} };
-	wall top_wall{sf::Vector2f{ 640.0, 20.0 }, sf::Vector2f{0.0, 0.0} };
-	wall right_wall{sf::Vector2f{ 20.0, 480.0 }, sf::Vector2f{620.0, 0.0} };
-	wall bottom_wall{sf::Vector2f{ 640.0, 20.0 }, sf::Vector2f{0.0, 460.0} };
-	player player1{ sf::Vector2f{playerSizeX, playerSizeY}, sf::Vector2f{20.0,20.0} };
-	
-	float xMovBall = -3.0, yMovBall = -3.0, xMovPlayer = 0.0, yMovPlayer = 0.0;
-	action actions[] = {
-		action([&] { return my_ball.BallIntersects(top_wall.getWall(),xMovBall, yMovBall); },					[&]() {my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action([&] { return my_ball.BallIntersects(left_wall.getWall(),xMovBall, yMovBall); },					[&]() {my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action([&] { return my_ball.BallIntersects(right_wall.getWall(),xMovBall, yMovBall); },				[&]() {my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action([&] { return my_ball.BallIntersects(bottom_wall.getWall(),xMovBall, yMovBall); },				[&]() {my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action([&] { return my_ball.BallIntersects(player1.getPlayer(), xMovBall, yMovBall); },	[&]() { my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action([&] { return true; }, [&]() { my_ball.move(sf::Vector2f(xMovBall,yMovBall)); }),
-		action(sf::Keyboard::Left,  [&]() { xMovPlayer = -3.0; yMovPlayer = 0.0; player1.move( sf::Vector2f(xMovPlayer, yMovPlayer)); }),
-		action(sf::Keyboard::Right, [&]() { xMovPlayer = +3.0; yMovPlayer = 0.0; player1.move(sf::Vector2f(xMovPlayer,  yMovPlayer)); }),
-		action(sf::Keyboard::Up,    [&]() { xMovPlayer = 0.0; yMovPlayer = -3.0; player1.move(sf::Vector2f(xMovPlayer,  yMovPlayer)); }),
-		action(sf::Keyboard::Down,  [&]() { xMovPlayer = 0.0; yMovPlayer = +3.0; player1.move(sf::Vector2f(xMovPlayer,  yMovPlayer)); }),
-		action(sf::Mouse::Left,     [&]() { player1.jump(sf::Mouse::getPosition(window).x - (playerSizeX / 2),sf::Mouse::getPosition(window).y - (playerSizeY / 2)); })
-	};
 
+	std::ifstream input("obj.txt");
+	std::vector<drawable *> shapes;
+	
+	try {
+		for (;;) {
+			shapes.push_back(make_drawable(input));
+		}
+		std::cout << "TEST\n";
+		input.close();
+	}
+	catch (end_of_file) {
+		input.close();
+	}
+	catch (std::exception & problem) {
+		std::cout << problem.what();
+		input.close();
+		return -1;
+	}
+	auto my_ball = shapes[0];
+	auto wall = shapes[1];
+	auto picture = shapes[2];
+	auto line = shapes[3];
+
+
+	action actions[] = {
+		action(sf::Mouse::Left,    [&] {for (drawable * object : shapes) object->jump(sf::Mouse::getPosition(window).x, sf::Mouse::getPosition(window).y); }),
+		action(sf::Mouse::Right,    [&] {for (drawable* object : shapes) object->get_hitbox().contains(sf::Vector2f(sf::Mouse::getPosition(window))) ? object->select() : object->deselect(); }),
+	};
+	
 	while (window.isOpen()) {
 		for (auto & action : actions) {
 			action();
 		}
 
 		window.clear();
-		player1.draw(window);
-		my_ball.draw(window);
-		left_wall.draw(window);
-		top_wall.draw(window);
-		right_wall.draw(window);
-		bottom_wall.draw(window);
+		my_ball->draw(window);
+		wall->draw(window);
+		picture->draw(window);
+		line->draw(window);
+
 		window.display();
 
 		sf::sleep(sf::milliseconds(20));
@@ -90,6 +180,12 @@ int main(int argc, char *argv[]) {
 		sf::Event event;
 		while (window.pollEvent(event)) {
 			if (event.type == sf::Event::Closed) {
+				std::ofstream output("obj.txt");
+				for (drawable * object : shapes) {
+					screen_object_write(output,object);
+				}
+				std::cout << "TEST\n";
+				output.close();
 				window.close();
 			}
 		}
@@ -98,4 +194,5 @@ int main(int argc, char *argv[]) {
 	std::cout << "Terminating application\n";
 	return 0;
 }
+
 

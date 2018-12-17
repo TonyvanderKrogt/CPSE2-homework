@@ -1,17 +1,17 @@
-#ifndef WALL_HPP
-#define WALL_HPP
+#ifndef PICTURE_HPP
+#define PICTURE_HPP
 
 #include "drawable.hpp"
+#include "exceptions.hpp"
 
-class wall : public drawable {
+class picture : public drawable {
 private:
-	sf::Vector2f size;
-	sf::Vector2f pos;
-	sf::Color color;
+	std::string image;
+	sf::Texture texture;
 	sf::RectangleShape rect;
 public:
 
-	wall(sf::Vector2f size, sf::Vector2f pos, sf::Color color);
+	picture(sf::Vector2f pos,std::string image);
 	void draw(sf::RenderWindow & window) const override;
 	void jump(sf::Vector2f target);
 	void jump(float x, float y) override;
@@ -21,7 +21,8 @@ public:
 	sf::Color get_color() const override;
 	sf::Vector2f get_size() const override;
 	std::string get_pathname() const override;
+
 };
 
 
-#endif // !WALL_HPP
+#endif // !PICTURE_HPP
